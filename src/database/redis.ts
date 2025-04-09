@@ -2,7 +2,7 @@ import Redis from "ioredis";
 import productionValue from "../modules/production.js";
 
 const redisUrl = productionValue(
-  process.env.REDIS_URL,
+  `${process.env.REDIS_URL}?family=0`,
   process.env.REDIS_PUBLIC_URL
 );
 
