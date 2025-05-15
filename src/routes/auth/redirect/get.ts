@@ -3,6 +3,7 @@ import { validateState } from "../../../modules/state-store.js";
 import pool from "../../../database/postgres.js";
 import redis from "../../../database/redis.js";
 import productionValue from "../../../modules/production.js";
+import jwt from "jsonwebtoken";
 
 export default async function (
   req: Request,
@@ -82,6 +83,7 @@ export default async function (
   }
 
   req.session.token = created_user.id; // Save user ID in session
+  req.session.jwt = jwt.sign(user_data, process.env.JWT_SECRET ?? "", {expiresIn: `1d`});
   req.session.save();
 
   redis.setex(

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import redis from "../../../database/redis.js";
 import pool from "../../../database/postgres.js";
+import jwt from "jsonwebtoken";
 
 export default async function (
   req: Request,
@@ -58,6 +59,11 @@ export default async function (
       60 * 60 * 24,
       JSON.stringify(user_data)
     ); // Cache user data for 24 hours
+    req.session.jwt = jwt.sign(user_data, process.env.JWT_SECRET ?? "", {
+      expiresIn: `1d`
+    });
+
+    user_data.token = jwt;
 
     return res.status(200).json(user_data); // Return user data
   } catch {
