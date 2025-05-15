@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import nacl from "tweetnacl";
 import {
+  Entitlement,
   Guild,
   User,
   WebhookRequest,
@@ -97,7 +98,80 @@ export default async function (
 
       return res.status(204).end();
     } else if (Data.event?.type == "ENTITLEMENT_CREATE") {
-      console.log(Data.event.data);
+      const EventData: Entitlement = Data.event.data;
+
+      await fetch(
+        "https://discord.com/api/channels/1372681641218281523/messages",
+        {
+          method: "POST",
+          cache: "no-store",
+          headers: {
+            Authorization: `Bot ${process.env.CLIENT_TOKEN}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(
+            {
+              embeds: [
+                {
+                  title: "Application Authorized",
+                  description: `**Type:** ${EventData.type
+                    .toString()
+                    .toLowerCase()
+                    .replaceAll("_", " ")
+                    .replace(/^\w/, (c) => c.toUpperCase())}`,
+                  fields: [
+                    {
+                      name: "User",
+                      value: `<@${EventData.user_id}> (${EventData.user_id})`
+                    },
+                    {
+                      name: "Guild",
+                      value: EventData.guild_id
+                        ? `${EventData.guild_id}`
+                        : `N/A`
+                    },
+                    {
+                      name: "SKU",
+                      value: EventData.sku_id ? `${EventData.sku_id}` : `N/A`
+                    },
+                    {
+                      name: "Start",
+                      value:
+                        new Date(EventData.starts_at ?? "").toLocaleString() ??
+                        "N/A",
+                      inline: true
+                    },
+                    {
+                      name: "End",
+                      value:
+                        new Date(EventData.ends_at ?? "").toLocaleString() ??
+                        "N/A",
+                      inline: true
+                    },
+                    {
+                      name: "Consumed",
+                      value: EventData.consumed ? "Yes" : "No",
+                      inline: true
+                    },
+                    {
+                      name: "Deleted",
+                      value: EventData.deleted ? "Yes" : "No",
+                      inline: true
+                    }
+                  ],
+                  footer: {
+                    text: `Entitlement ID: ${EventData.id}`
+                  }
+                }
+              ]
+            },
+            null,
+            ""
+          )
+        }
+      );
+
+      return res.status(204).end();
     }
   }
   return res.status(400).json({ status: 400, message: "Invalid data" });
