@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import nacl from "tweetnacl";
 import {
   Entitlement,
+  EntitlementType,
   Guild,
   User,
   WebhookRequest,
@@ -113,9 +114,8 @@ export default async function (
             {
               embeds: [
                 {
-                  title: "Application Authorized",
-                  description: `**Type:** ${EventData.type
-                    .toString()
+                  title: "Entitlement Created",
+                  description: `**Type:** ${EntitlementType[EventData.type]
                     .toLowerCase()
                     .replaceAll("_", " ")
                     .replace(/^\w/, (c) => c.toUpperCase())}`,
