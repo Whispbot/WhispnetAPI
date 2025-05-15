@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import nacl from "tweetnacl";
-import { Guild, User, WebhookRequest, WebhookType } from "../../../../types";
+import {
+  Guild,
+  User,
+  WebhookRequest,
+  WebhookType
+} from "../../../../modules/types.js";
 
 type ApplicationAuthorizedData = {
   integration_type?: number;

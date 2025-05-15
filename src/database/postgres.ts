@@ -26,8 +26,10 @@ pool.on("error", (err: any) => {
   process.exit(-1);
 });
 
-pool.on("connect", () => {
-  console.log(`Connected to database in ${Date.now() - start}ms`);
-});
+const client = await pool.connect();
+client.query("SELECT 1");
+client.release();
+
+console.log(`Connected to database in ${Date.now() - start}ms`);
 
 export default pool;
