@@ -9,13 +9,14 @@
     "@types/express": "^5.0.1",
     "@types/express-session": "^1.18.1",
     "@types/ioredis": "^4.28.10",
-    "@types/jsonwebtoken": "^9.0.9"
+    "@types/jsonwebtoken": "^9.0.9",
+    "nodemon": "^3.1.10"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "scripts": {
-    "dev": "rm -rf dist && tsc && node ./dist/index.js",
+    "dev": "nodemon",
     "start": "node ./dist/index.js",
     "build": "tsc",
     "clean": "rm -rf dist"

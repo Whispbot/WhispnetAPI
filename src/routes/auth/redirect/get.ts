@@ -83,7 +83,7 @@ export default async function (
   }
 
   req.session.token = created_user.id; // Save user ID in session
-  req.session.jwt = jwt.sign(user_data, process.env.JWT_SECRET ?? "", {expiresIn: `1d`});
+  req.session.user_id = created_user.user_id; // Save user ID in session
   req.session.save();
 
   redis.setex(
