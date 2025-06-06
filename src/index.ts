@@ -6,6 +6,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { sessionMiddleware } from "./middleware/session.js";
+import { getUserFromToken } from "./modules/user.js";
 
 // ES module is not available by default
 const __filename = fileURLToPath(import.meta.url);
@@ -88,7 +89,9 @@ const loadRoutes = async (dir: string, basePath = "") => {
           (router[method as keyof express.Router] as Function)(
             "/",
             ...middleware,
-            (req: Request, res: Response) => route(req, res, req.params)
+            (req: Request, res: Response) => {
+              return route(req, res, req.params);
+            }
           );
         }
       });
@@ -109,9 +112,25 @@ const loadRoutes = async (dir: string, basePath = "") => {
 const init = async () => {
   await loadRoutes(routesDir);
 
-  app.use((err: Error, req: Request, res: Response, next: Function) => {
+  app.use(async (err: Error, req: Request, res: Response, next: Function) => {
     const eventId = Sentry.captureException(err);
-    console.error(err);
+
+    const user = req.session?.token
+      ? await getUserFromToken(req.session.token)
+      : undefined;
+
+    Sentry.setUser({
+      id: req.session?.user_id,
+      username: user?.username,
+      ip_address: req.ip
+    });
+
+    Sentry.setContext("request", {
+      url: req.originalUrl,
+      method: req.method,
+      path: req.path
+    });
+
     res.status(500).json({
       status: 500,
       message: "Internal Server Error",
