@@ -1,4 +1,6 @@
+import "./instrument.js";
 import express, { Request, Response } from "express";
+import * as Sentry from "@sentry/node";
 import cors from "cors";
 import fs from "fs";
 import path from "path";
@@ -38,6 +40,8 @@ app.set("trust proxy", true);
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(sessionMiddleware);
+
+Sentry.setupExpressErrorHandler(app);
 
 // ii. Load routes
 const routesDir = path.join(__dirname, "routes");
@@ -104,6 +108,16 @@ const loadRoutes = async (dir: string, basePath = "") => {
 
 const init = async () => {
   await loadRoutes(routesDir);
+
+  app.use((err: Error, req: Request, res: Response, next: Function) => {
+    const eventId = Sentry.captureException(err);
+    console.error(err);
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      id: eventId
+    });
+  });
 
   app.listen(PORT, () => {
     console.log(`\nServer running on port ${PORT}`);
